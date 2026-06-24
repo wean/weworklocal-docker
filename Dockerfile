@@ -46,6 +46,12 @@ RUN apt update && apt install -y \
 RUN sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen
 
+RUN apt-get update && apt-get install -y tzdata \
+    && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && dpkg-reconfigure --frontend noninteractive tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY weworklocal_*.deb /tmp/wework.deb
 
 RUN apt update && \
@@ -56,6 +62,8 @@ RUN useradd -m wework
 USER wework
 WORKDIR /home/wework
 
+RUN rm -rf /usr/share/dbus-1/services/org.freedesktop.portal.* || true
+RUN rm -rf /usr/share/xdg-desktop-portal || true
 
 CMD ["/opt/企业微信/wwlocal", "--disable-gpu", "--disable-gpu-sandbox"]
 #CMD ["xeyes"]
